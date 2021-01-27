@@ -39,8 +39,13 @@ ai.output = [2,3];
 
 ai.setInput = function (arr) {
 	if(this.value[0].length==arr.length) this.value[0]=arr;
-	else console.log("Arguments length doesn't same with input length");
+	else console.warn("Arguments length doesn't same with input length");
 };
+
+ai.setOutput = function (arr) {
+	if(this.output.length == arr.length) this.output = arr;
+	else console.warn("Arguments length doesn't same with output length");
+}
 
 /*ai.createPerceptron = function (layerNumber) {
 	if (this.layers.length>layerNumber) {
@@ -102,27 +107,30 @@ ai.parameterInitialize = function () {
 	}
 }
 
-ai.setNeural = function (layerArr) {
-	this.layers = layerArr;
-	for(var i = 1; i < layerArr.length; i++){
-		this.weight = this.weight.push(Array().fill(0));
-	}
-};
-
 ai.viewResult = function() {
 	for (var i = 0; i < this.layers.length; i++){
 		for (var j = 0; j < this.layers[i]; j++){
-			circle(i*75+50, j*75+35, 25, floorColorRange(127 - this.value[i][j]*50));
+			circle(i*75+50, j*75+35, 25, floorColorRange(127 - this.value[i][j]*100));
 		}
 	}
 	for (var i = 1; i < this.layers.length; i++){
 		for (var j = 0; j < this.layers[i]; j++){
 			for (var k = 0; k < this.layers[i-1]; k++){
-				line((i-1)*75+50, k*75+35, i*75+50, j*75+35, floorColorRange(127 - this.weight[i-1][j][k]*200));
+				line((i-1)*75+50, k*75+35, i*75+50, j*75+35, floorColorRange(127 - this.weight[i-1][j][k]*500));
 			}
 		}
 	}
 }
+
+ai.cost = function (){
+	var sum = 0;
+	var lastLayer = this.layers[this.layers.length - 1];
+	for (var i = 0; i < lastLayer; i++){
+		sum += (this.value[this.layers.length - 1][i]-this.output[i])**2;
+	}
+	document.querySelectorAll("#cost span")[0].innerText = sum / lastLayer;
+	return sum / lastLayer;
+};
 
 ai.updataValue = function () {
 	var actFunc = this.activationFuntion.execute;
@@ -137,17 +145,29 @@ ai.updataValue = function () {
 		}
 	}
 	this.viewResult();
-	this.cost();
+	console.log(this.cost());
 };
 
-ai.cost = function (){
-	var sum = 0;
-	var lastLayer = this.layers[this.layers.length-1];
-	for (var i = 0; i < lastLayer; i++){
-		sum += (this.value[lastLayer-1][i]-this.output[i])**2;
+ai.setPerceptron = function (layerArr) {
+	var l = layerArr.length;
+	this.layers = layerArr;
+	this.weight = Array(l - 1).fill(0);
+	this.bias = Array(l - 1).fill(0);
+	this.value = Array(l).fill(0);
+	this.value[0] = Array(layerArr[0]).fill(0);
+	this.output = Array(layerArr[l - 1]).fill(0);
+	for (var i = 1; i < l; i++){
+		this.weight[i - 1] = Array(layerArr[i]).fill(0);
+		this.bias[i - 1] = Array(layerArr[i]).fill(0);
+		this.value[i] = Array(layerArr[i]).fill(0);
+		for (var j = 0; j < layerArr[i]; j++){
+			this.weight[i - 1][j] = Array(layerArr[i - 1]).fill(0);
+		}
 	}
-	document.querySelectorAll("#cost span")[0].innerText = sum / lastLayer;
-	return sum / lastLayer;
+	this.parameterInitialize();
+	this.updataValue();
+	console.log("set input and output plz\n(as setInput function and setOutput function)");
+	this.info();
 };
 
 ai.info = function () {return "layer : "+this.layers+[] +"\n"+"activationFuntion : "+ai.activationFuntion.name};
