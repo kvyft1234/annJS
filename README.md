@@ -6,7 +6,7 @@
 ```
   ai.setPerceptron(layerArr);
   //this is code that set Perceptron.
-  //example : if "ai.setPerceptron([5,10,2,1]);" execute, layers set '[5,10,2,1]'
+  //example : if "ai.setPerceptron([5,10,2,1]);" is executed, layers set '[5,10,2,1]'
 ```
 
 ```
