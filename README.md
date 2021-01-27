@@ -1,2 +1,2 @@
 # annJS
-I realize ann as javascript.
+I make ann as javascript.
