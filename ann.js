@@ -1,177 +1,162 @@
-var ctx = ai_canvas.getContext('2d');
 
-var getOpacityToColor = function(k){
-	return "rgb("+ (k+', ').repeat(2) + k +")";
-}
+var mkRange = function(a){let sum=0; return Array(a).fill(1).map(function(k){return sum++;})};
+Math.rand = function(){let r=Math.random(); return Math.log(r/(1-r))};
+JSON.new = function(a){return JSON.parse(JSON.stringify(a));};
+Array.sum = function(a){let sum=0; Array.num(a.length).map(function(k){sum += a[k]}); return sum;};
+var mkTensor = function(a,...b){return b.length==0 ? Array(a).fill(0):Array(a).fill(0).map(i=>mkTensor(...b))};
+var mkArray2 = function(arr){let r=mkTensor(arr.length); for(let i=0; i<arr.length; i++){r[i]=mkTensor(arr[i])} return r;};
+var fillRandom = function(arr){return arr.map(i => Math.random()).map(i => Math.log(i/(1-i)))};
+var cl = function (a, ...b){let c = Array.from(arguments).map(i=>JSON.new(i)); console.log.apply(this,c); return c[0];};
 
-var circle = function (x,y,r,opacity) {
-	ctx.strokeStyle = getOpacityToColor(opacity);
-	ctx.fillStyle = getOpacityToColor(opacity);
-	ctx.beginPath();
-	ctx.arc(x,y,r, 0, 2 * Math.PI);
-	ctx.fill();
-}
+const AI = {};
 
-var line = function(x1,y1,x2,y2,opacity){
-	ctx.strokeStyle = getOpacityToColor(opacity);
-	ctx.fillStyle = getOpacityToColor(opacity);
-	ctx.moveTo(x1, y1);
-	ctx.lineTo(x2, y2);
-	ctx.stroke();
-}
+AI.activationFunction = {};
+AI.ANN = {};
 
-var getPos = function(a,b){
-	return [a*50-10, b*50-10];
-}
+AI.activationFunction.leakyReLU = function (x){return x>0 ? x:x*0.1};
+AI.activationFunction.sigmoid = function (x){return 1/(1+Math.E**(-x))};
 
-var floorColorRange = function(k){
-	if(k<0) return 0;
-	else if (k>255) return 255;
-	else return Math.floor(k + 0.5);
-}
-
-var ai={};
-ai.layers = [3,2];
-ai.weight = [[[0.1,0.2,0.3], [0.1,0.2,0.3]]];
-ai.bias = [[0.1, 0.2]];
-ai.value = [[1,2,3], [4,5]];
-ai.output = [2,3];
-
-ai.setInput = function (arr) {
-	if(this.value[0].length==arr.length) this.value[0]=arr;
-	else console.warn("Arguments length doesn't same with input length");
+AI.ANN.variable = {};
+AI.ANN.variable.layer = [];
+AI.ANN.variable.perceptron = [];
+AI.ANN.variable.weight = [];
+AI.ANN.variable.bias = [];
+AI.ANN.variable.z = [];
+AI.ANN.variable.activationFunction = [];
+AI.ANN.setLayer = function (layer){
+	this.variable.layer = layer;
+	let l = layer;
+	let ll = l.length;
+	let v = this.variable;
+	let p = v.perceptron;
+	let w = v.weight;
+	let b = v.bias;
+	let z = v.z;
+	let a = v.activationFunction;
+	let af = AI.activationFunction;
+	let lr = af.leakyReLU;
+	let sm = af.sigmoid;
+	p = mkArray2(l);
+	w = mkRange(ll-1).map(i => mkTensor(l[i+1]).map(j => fillRandom(mkTensor(l[i]))));
+	b = mkRange(ll-1).map(i => fillRandom(mkTensor(l[i+1])));
+	z = mkRange(ll-1).map(i => mkTensor(l[i+1]));
+	a = mkTensor(ll-1).map(i=>lr);
+	a[ll-2] = sm;
+	this.variable.perceptron = p;
+	this.variable.weight = w;
+	this.variable.bias = b;
+	this.variable.z = z;
+	this.variable.activationFunction = a;
 };
-
-ai.setOutput = function (arr) {
-	if(this.output.length == arr.length) this.output = arr;
-	else console.warn("Arguments length doesn't same with output length");
-}
-
-/*ai.createPerceptron = function (layerNumber) {
-	if (this.layers.length>layerNumber) {
-		this.value[layerNumber].push(0);
-		if(layerNumber != 0){
-			var k = function () {return 0;};
-			this.bias[layerNumber].push(0);
-			this.weight[layerNumber].push( Array(this.layers[layerNumber-1]).fill(1).map(k));
-		}
-		if(layerNumber != this.layers.length - 1){
-			this.weight[layerNumber].map(function(){return arguments[0].push(0)},this);
-		}
-	} else if (this.layers.length == layerNumber){
-		this.layers.push(1);
-		this.weight.push([]);
-		this.weight[layerNumber].push(Array(this.layers[layerNumber - 1]).fill(0));
-		this.bias.push([0]);
-		this.value.push([0]);
-	} else {
-		console.log("Unexpected token arguments");
-	}
-};*/
-
-ai.activationFuntionKind = {
-	sigmoid : function (x) {return 1/(1+Math.exp(-x))},
-	ReLU : function (x) {return x<0 ? 0:x},
-	LeakyReLU : function (x) {return x<0 ? 0.1*x:x},
-	tanh : Math.tanh
-};
-
-ai.dFunctionDerivative = {
-	sigmoid : function (x) {var a = 1/(1+Math.exp(-x)); return a*(1-a);},
-	ReLU : function (x) {return x<0 ? 0:1},
-	LeakyReLU : function (x) {return x<0 ? 0.1:1},
-	tanh : function (x) {return 1/Math.cosh(x)**2}
-}
-
-ai.activationFuntion = {
-	name : "LeakyReLU",
-	execute : ai.activationFuntionKind.LeakyReLU,
-	derivative : ai.dFunctionDerivative.LeakyReLU
-}
-
-ai.setActivationFunction = function (name) {
-	ai.activationFuntion.name = name;
-	ai.activationFuntion.execute = eval("ai.activationFuntion."+name);
-	ai.activationFuntion.derivative = eval("ai.dFunctionDerivative."+name);
-}
-
-ai.setInitialValue = function () {return Math.random()*2-1};
-
-ai.parameterInitialize = function () {
-	var a = this.setInitialValue;
-	for (var i = 0; i < this.weight.length; i++){
-		for (var j = 0; j < this.weight[i].length; j++){
-			this.weight[i][j] = this.weight[i][j].map(a);
-		}
-		this.bias[i] = this.bias[i].map(a);
-	}
-}
-
-ai.viewResult = function() {
-	for (var i = 0; i < this.layers.length; i++){
-		for (var j = 0; j < this.layers[i]; j++){
-			circle(i*75+50, j*75+35, 25, floorColorRange(127 - this.value[i][j]*100));
-		}
-	}
-	for (var i = 1; i < this.layers.length; i++){
-		for (var j = 0; j < this.layers[i]; j++){
-			for (var k = 0; k < this.layers[i-1]; k++){
-				line((i-1)*75+50, k*75+35, i*75+50, j*75+35, floorColorRange(127 - this.weight[i-1][j][k]*500));
+AI.ANN.propagation = function(inputLayer){
+	let v = this.variable;
+	let l = v.layer;
+	let ll = l.length;
+	let p = v.perceptron;
+	let w = v.weight;
+	let b = v.bias;
+	let z = v.z;
+	let a = v.activationFunction;
+	p[0] = inputLayer;
+	for(let i = 0; i < ll-1; i++){
+		for(let j = 0; j < l[i+1]; j++){
+			let sum = 0;
+			for(let k = 0; k < l[i]; k++){
+				sum += p[i][k] * w[i][j][k];
 			}
+			sum += b[i][j];
+			z[i][j] = sum;
+			p[i+1][j] = a[i](z[i][j]);
 		}
 	}
-}
-
-ai.cost = function (){
-	var sum = 0;
-	var lastLayer = this.layers[this.layers.length - 1];
-	for (var i = 0; i < lastLayer; i++){
-		sum += (this.value[this.layers.length - 1][i]-this.output[i])**2;
-	}
-	document.querySelectorAll("#cost span")[0].innerText = sum / lastLayer;
-	return sum / lastLayer;
+	this.variable.perceptron = p;
+	this.variable.z = z;
+	return p[ll-1];
 };
-
-ai.updataValue = function () {
-	var actFunc = this.activationFuntion.execute;
-	var sum;
-	for (var i = 1; i < this.value.length; i++){
-		for (var j = 0; j < this.value[i].length; j++){
-			sum = 0;
-			for (var k = 0; k < this.value[i-1].length; k++){
-				sum += this.weight[i-1][j][k]*this.value[i-1][k];
+AI.ANN.backPropagation = function (answer, learnRate){
+	let v = this.variable;
+	let l = v.layer;
+	let ll = l.length;
+	let p = v.perceptron;
+	let w = v.weight;
+	let b = v.bias;
+	let z = v.z;
+	let a = v.activationFunction;
+	let delta = mkRange(ll-1).map(i => mkTensor(l[i+1]));
+	let df = function(f,x){return (f(x+0.001)-f(x-0.001))/0.002};
+	let daf = function(n,x){return df(a[n],x)};
+	for(let i=0; i<l[ll-1]; i++){
+		delta[ll-2][i] = 2*(p[ll-1][i]-answer[i])*daf(ll-2,z[ll-2][i]);
+	}
+	for(let i=0; i<l[ll-1]; i++){
+		for(let j=0; j<l[ll-2]; j++){
+			w[ll-2][i][j] -= learnRate * delta[ll-2][i] * p[ll-2][j];
+		}
+		b[ll-2][i] -= learnRate * delta[ll-2][i];
+	}
+	for(let i=ll-3; i>=0; i--){
+		for(let j=0; j<l[i+1]; j++){
+			for(let k=0; k<l[i+2]; k++){
+				delta[i][j] += delta[i+1][k]*w[i+1][k][j];
 			}
-			this.value[i][j] = actFunc(sum+this.bias[i-1][j]);
+			delta[i][j] *= daf(i,z[i][j]);
+		}
+		for(let j=0; j<l[i+1]; j++){
+			for(let k=0; k<l[i]; k++){
+				w[i][j][k] -= learnRate * delta[i][j] * p[i][k];
+			}
+			b[i][j] -= learnRate * delta[i][j];
 		}
 	}
-	this.viewResult();
-	console.log(this.cost());
-};
-
-ai.setPerceptron = function (layerArr) {
-	var l = layerArr.length;
-	this.layers = layerArr;
-	this.weight = Array(l - 1).fill(0);
-	this.bias = Array(l - 1).fill(0);
-	this.value = Array(l).fill(0);
-	this.value[0] = Array(layerArr[0]).fill(0);
-	this.output = Array(layerArr[l - 1]).fill(0);
-	for (var i = 1; i < l; i++){
-		this.weight[i - 1] = Array(layerArr[i]).fill(0);
-		this.bias[i - 1] = Array(layerArr[i]).fill(0);
-		this.value[i] = Array(layerArr[i]).fill(0);
-		for (var j = 0; j < layerArr[i]; j++){
-			this.weight[i - 1][j] = Array(layerArr[i - 1]).fill(0);
-		}
+	this.variable.weight = w;
+	this.variable.bias = b;
+	let cost = 0;
+	for(let i=0; i<p[ll-1].length; i++){
+		cost += (p[ll-1][i]-answer[i])**2;
 	}
-	this.parameterInitialize();
-	this.updataValue();
-	console.log("set input and output plz\n(as setInput function and setOutput function)");
-	this.info();
 };
 
-ai.info = function () {return "layer : "+this.layers+[] +"\n"+"activationFuntion : "+ai.activationFuntion.name};
+AI.ANN.setLayer([2,2,1]);
+AI.ANN.variable.weight=[[[-10,10],[10,-10]],[[1000,1000]]];
+AI.ANN.variable.bias=[[0,0],[0]];
 
-ai.parameterInitialize();
-ai.updataValue();
-ai.info();
+var time = setInterval(function(){
+	for(let n=0; n<1000; n++){
+		AI.ANN.propagation([1,-1]);
+		AI.ANN.backPropagation([1], 0.01);
+		AI.ANN.propagation([-1,1]);
+		AI.ANN.backPropagation([1], 0.01);
+		AI.ANN.propagation([-1,-1]);
+		AI.ANN.backPropagation([0], 0.01);
+		AI.ANN.propagation([1,1]);
+		AI.ANN.backPropagation([0], 0.01);
+	}
+	cl((AI.ANN.propagation([1,-1])[0]-1)**2+(AI.ANN.propagation([-1,1])[0]-1)**2+AI.ANN.propagation([-1,-1])[0]**2+AI.ANN.propagation([1,1])[0]**2);
+},1000);
+setTimeout(function(){
+	clearInterval(time);
+	cl('complete')
+},20000);
+
+////////////////////////////////////////
+
+// function learning(input, answer, learnRate, learnCount){
+// 	AI.ANN.propagation(input);
+// 	for(let n=0; n<learnCount; n++){
+// 		AI.ANN.backPropagation(answer, learnRate);
+// 	}
+// }
+
+// var pos1 = [[786,252],[656,217],[420,167],[89,70],[99,149],[116,215],[251,228],[381,207],[290,108],[331,75],[689,86],[353,41],[526,97],[725,106],[817,68],[901,98],[879,217],[792,260],[590,255],[415,220],[118,207],[282,224],[774,215],[832,215],[836,216]];
+// var pos2 = [[819,787],[696,736],[540,721],[273,724],[123,738],[6,774],[194,756],[239,756],[506,744],[651,793],[436,882],[329,890],[143,896],[152,897],[560,902],[697,886],[467,814],[310,797],[569,749],[763,752],[922,790],[933,837],[910,886],[841,912],[696,928],[794,910]];
+
+// for(let i=0; i<pos1.length; i++){
+// 	learning(pos1[i],[1],0.001,10);
+// }
+// for(let i=0; i<pos2.length; i++){
+// 	learning(pos2[i],[0],0.001,10);
+// }
+
+// document.onclick = function(e){AI.ANN.propagation([e.clientX, e.clientY]); cl(AI.ANN.variable.perceptron[2]);}
+
+
