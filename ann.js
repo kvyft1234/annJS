@@ -15,6 +15,8 @@ AI.ANN = {};
 
 AI.activationFunction.leakyReLU = function (x){return x>0 ? x:x*0.1};
 AI.activationFunction.sigmoid = function (x){return 1/(1+Math.E**(-x))};
+AI.activationFunction.tanh = Math.tanh;
+AI.activationFunction.ReLU = x => x>0 ? x:0;
 
 AI.ANN.variable = {};
 AI.ANN.variable.layer = [];
@@ -116,27 +118,29 @@ AI.ANN.backPropagation = function (answer, learnRate){
 	}
 };
 
-AI.ANN.setLayer([2,2,1]);
-AI.ANN.variable.weight=[[[-10,10],[10,-10]],[[1000,1000]]];
-AI.ANN.variable.bias=[[0,0],[0]];
+AI.ANN.setLayer([2,4,1]);
+// AI.ANN.variable.weight=[[[10,10],[-10,10],[-10,-10],[10,-10]],[[-10,10,-10,10]]];
+// AI.ANN.variable.bias=[[0,0,0,0],[0]];
 
-var time = setInterval(function(){
+// var time = setInterval(function(){
+for(let _$=0; _$<100; _$++){
 	for(let n=0; n<1000; n++){
-		AI.ANN.propagation([1,-1]);
-		AI.ANN.backPropagation([1], 0.01);
-		AI.ANN.propagation([-1,1]);
-		AI.ANN.backPropagation([1], 0.01);
-		AI.ANN.propagation([-1,-1]);
-		AI.ANN.backPropagation([0], 0.01);
+		AI.ANN.propagation([1,0]);
+		AI.ANN.backPropagation([1], 0.0008);
+		AI.ANN.propagation([0,1]);
+		AI.ANN.backPropagation([1], 0.0008);
+		AI.ANN.propagation([0,0]);
+		AI.ANN.backPropagation([0], 0.0008);
 		AI.ANN.propagation([1,1]);
-		AI.ANN.backPropagation([0], 0.01);
+		AI.ANN.backPropagation([0], 0.0008);
 	}
-	cl((AI.ANN.propagation([1,-1])[0]-1)**2+(AI.ANN.propagation([-1,1])[0]-1)**2+AI.ANN.propagation([-1,-1])[0]**2+AI.ANN.propagation([1,1])[0]**2);
-},1000);
-setTimeout(function(){
-	clearInterval(time);
-	cl('complete')
-},20000);
+}
+	cl((AI.ANN.propagation([1,0])[0]-1)**2+(AI.ANN.propagation([0,1])[0]-1)**2+AI.ANN.propagation([0,0])[0]**2+AI.ANN.propagation([1,1])[0]**2);
+// },1000);
+// setTimeout(function(){
+// 	clearInterval(time);
+// 	cl('complete')
+// },20000);
 
 ////////////////////////////////////////
 
