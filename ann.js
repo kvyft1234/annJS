@@ -36,7 +36,7 @@ AI.ANN.setLayer = function (layer){
 	let z = v.z;
 	let a = v.activationFunction;
 	let af = AI.activationFunction;
-	let lr = af.leakyReLU;
+	let lr = af.tanh;
 	let sm = af.sigmoid;
 	p = mkArray2(l);
 	w = mkRange(ll-1).map(i => mkTensor(l[i+1]).map(j => fillRandom(mkTensor(l[i]))));
@@ -122,7 +122,7 @@ AI.ANN.setLayer([2,4,1]);
 // AI.ANN.variable.weight=[[[10,10],[-10,10],[-10,-10],[10,-10]],[[-10,10,-10,10]]];
 // AI.ANN.variable.bias=[[0,0,0,0],[0]];
 
-// var time = setInterval(function(){
+var time = setInterval(function(){
 for(let _$=0; _$<100; _$++){
 	for(let n=0; n<1000; n++){
 		AI.ANN.propagation([1,0]);
@@ -136,31 +136,8 @@ for(let _$=0; _$<100; _$++){
 	}
 }
 	cl((AI.ANN.propagation([1,0])[0]-1)**2+(AI.ANN.propagation([0,1])[0]-1)**2+AI.ANN.propagation([0,0])[0]**2+AI.ANN.propagation([1,1])[0]**2);
-// },1000);
-// setTimeout(function(){
-// 	clearInterval(time);
-// 	cl('complete')
-// },20000);
-
-////////////////////////////////////////
-
-// function learning(input, answer, learnRate, learnCount){
-// 	AI.ANN.propagation(input);
-// 	for(let n=0; n<learnCount; n++){
-// 		AI.ANN.backPropagation(answer, learnRate);
-// 	}
-// }
-
-// var pos1 = [[786,252],[656,217],[420,167],[89,70],[99,149],[116,215],[251,228],[381,207],[290,108],[331,75],[689,86],[353,41],[526,97],[725,106],[817,68],[901,98],[879,217],[792,260],[590,255],[415,220],[118,207],[282,224],[774,215],[832,215],[836,216]];
-// var pos2 = [[819,787],[696,736],[540,721],[273,724],[123,738],[6,774],[194,756],[239,756],[506,744],[651,793],[436,882],[329,890],[143,896],[152,897],[560,902],[697,886],[467,814],[310,797],[569,749],[763,752],[922,790],[933,837],[910,886],[841,912],[696,928],[794,910]];
-
-// for(let i=0; i<pos1.length; i++){
-// 	learning(pos1[i],[1],0.001,10);
-// }
-// for(let i=0; i<pos2.length; i++){
-// 	learning(pos2[i],[0],0.001,10);
-// }
-
-// document.onclick = function(e){AI.ANN.propagation([e.clientX, e.clientY]); cl(AI.ANN.variable.perceptron[2]);}
-
-
+},3000);
+setTimeout(function(){
+	clearInterval(time);
+	cl('complete')
+},20000);
