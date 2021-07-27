@@ -1,17 +1,100 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title>인공지능 실습</title>
+	<title>딥러닝</title>
 	<style>
-		#ai_canvas{
-			width: 1000px;
-			height: 1000px;
+		html{
+			background-color: black;
+		}
+		body{
+			background-color: white;
+			padding: 10px;
+			margin: 10px;
+		}
+		div{
+			padding: 10px;
+			margin: 10px;
+			background-color: white;
+		}
+		.Network{
+			border: 1px solid black;
+			overflow-x: scroll;
+		}
+		.layer{
+			border: 1px solid black;
+			margin: 5px;
+			border-radius: 5px 5px 5px 5px;
+			width: 200px;
+			height: 400px;
+			display: inline-grid;
+		}
+		.option{
+			border: 1px solid black;
+		}
+		.line{
+			height: 0px;
+			border: 1px solid black;
+			margin: 0px;
+			padding: 0px;
+		}
+		.plus1{
+			position: relative;
+			top: 195px;
+			left: 50px;
+			width: 100px;
+			height: 10px;
+			background-color: gray;
+			padding: 0px;
+			margin: 0px;
+		}
+		.plus2{
+			position: relative;
+			top: 0px;
+			left: 95px;
+			width: 10px;
+			height: 100px;
+			background-color: gray;
+			padding: 0px;
+			margin: 0px;
+		}
+		.add{
+			padding: 0px;
+		}
+		.add:hover{
+			background-color: rgb(220, 220, 220);
 		}
 	</style>
 </head>
+
 <body>
-	<div id="cost">Cost : <span>0</span></div>
-	<canvas id="ai_canvas" width="1000" height="1000"></canvas>
-	<script type="text/javascript" src="ann.js"></script>
+	<div class="Network">
+		<table>
+		    <tbody>
+		        <tr>
+		            <td class="layer">
+		            	<div style="margin: 5px;">입력층</div>
+		            	<div style="margin: 5px;">퍼셉트론 : 2개</div>
+		            	<div style="margin: 5px;"></div>
+		            </td>
+		            <td class="add layer" onclick="addLayer()">
+		            	<div class="plus1"></div>
+		            	<div class="plus2"></div>
+		            </td>
+		            <td class="layer">
+		            	<div style="margin: 5px;">출력층</div>
+		            	<div style="margin: 5px;">퍼셉트론 : 1개</div>
+		            	<div style="margin: 5px;"></div>
+		            </td>
+		        </tr>
+		    </tbody>
+		</table>
+	</div>
+	<div class="line"></div>
+	<div class="option">
+		dsgf
+	</div>
+	<script type="text/javascript" src="script.js"></script>
 </body>
+
 </html>
