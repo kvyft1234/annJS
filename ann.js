@@ -118,26 +118,79 @@ AI.ANN.backPropagation = function (answer, learnRate){
 	}
 };
 
-AI.ANN.setLayer([2,4,1]);
+AI.ANN.setLayer([2,8,1]);
 // AI.ANN.variable.weight=[[[10,10],[-10,10],[-10,-10],[10,-10]],[[-10,10,-10,10]]];
 // AI.ANN.variable.bias=[[0,0,0,0],[0]];
 
-var time = setInterval(function(){
-for(let _$=0; _$<100; _$++){
-	for(let n=0; n<1000; n++){
-		AI.ANN.propagation([1,0]);
-		AI.ANN.backPropagation([1], 0.0008);
-		AI.ANN.propagation([0,1]);
-		AI.ANN.backPropagation([1], 0.0008);
-		AI.ANN.propagation([0,0]);
-		AI.ANN.backPropagation([0], 0.0008);
-		AI.ANN.propagation([1,1]);
-		AI.ANN.backPropagation([0], 0.0008);
-	}
-}
-	cl((AI.ANN.propagation([1,0])[0]-1)**2+(AI.ANN.propagation([0,1])[0]-1)**2+AI.ANN.propagation([0,0])[0]**2+AI.ANN.propagation([1,1])[0]**2);
-},3000);
-setTimeout(function(){
+var time;
+function learn(){
 	clearInterval(time);
-	cl('complete')
-},20000);
+	time = setInterval(function(){
+	for(let _$=0; _$<100; _$++){
+		for(let n=0; n<1000; n++){
+			AI.ANN.propagation([0,0]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([0.4,0]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([0.6,0]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([1,0]);
+			AI.ANN.backPropagation([1], 0.0008);
+
+			AI.ANN.propagation([0,0.4]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([0.4,0.4]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([0.6,0.4]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([1,0.4]);
+			AI.ANN.backPropagation([1], 0.0008);
+
+			AI.ANN.propagation([0,0.6]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([0.4,0.6]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([0.6,0.6]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([1,0.6]);
+			AI.ANN.backPropagation([0], 0.0008);
+
+			AI.ANN.propagation([0,1]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([0.4,1]);
+			AI.ANN.backPropagation([1], 0.0008);
+			AI.ANN.propagation([0.6,1]);
+			AI.ANN.backPropagation([0], 0.0008);
+			AI.ANN.propagation([1,1]);
+			AI.ANN.backPropagation([0], 0.0008);
+
+		}
+	}
+		cl((AI.ANN.propagation([1,0])[0]-1)**2+(AI.ANN.propagation([0,1])[0]-1)**2+AI.ANN.propagation([0,0])[0]**2+AI.ANN.propagation([1,1])[0]**2);
+	},3000);
+	setTimeout(function(){
+		clearInterval(time);
+		cl('complete')
+	},20000);
+}
+
+var a = document.createElement('canvas');
+a.setAttribute('width',"100px");
+a.setAttribute('height',"100px");
+a.setAttribute('style',"border: 1px solid black;");
+var b = document.querySelector("body > div.Network");
+b.appendChild(a);
+var c = document.querySelector('canvas');
+var d = c.getContext('2d');
+
+function setColor(color){d.fillStyle = `rgb(${Math.floor(color*255)},255,${Math.floor(color*255)})`};
+
+function view(){
+	d.clearRect(0,0,100,100);
+	for(let i=0; i<101; i++){ for(let j=101; j>=0; j--){
+		setColor(1-AI.ANN.propagation([i/100,j/100])[0]);
+		d.beginPath();
+		d.fillRect(i,j,1,1);
+		d.closePath();
+	}}
+}
