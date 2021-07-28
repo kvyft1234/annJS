@@ -1,6 +1,11 @@
 # annJS
-##### made ann(artificial neural network) as javascript.
+##### made ann(artificial neural network) in javascript.
 ### https://kvyft1234.github.io/annJS/neuralNetwork.html
+
+```
+learn(); // xor ann learns
+view(); // view xor ann
+```
 
 ```
 AI.ANN.setLayer([4,3,3,2]) // inputLayer(4), hiddenLayer(3,3), outputLayer(2)
